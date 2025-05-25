@@ -155,39 +155,44 @@ function App() {
       {matchHistory.length > 0 && (
         <div className="matches">
           <h2>Last 10 Matches</h2>
-          {matchHistory.map((match, i) => (
-            <div key={i} className="match-card">
-              <img
-                src={getMapImage(match.map?.id || "Unknown")}
-                alt={match.map?.name}
-                className="map-img"
-              />
-              <div className="match-info">
-                <p>
-                  <strong>Map:</strong> {match.map?.name || "Unknown"}
-                </p>
-                <p>
-                  <strong>Rank:</strong> {match.currenttierpatched ?? "Unknown"}
-                </p>
-                <p>
-                  <strong>KDA:</strong>{" "}
-                  {match.stats
-                    ? `${match.stats.kills}/${match.stats.deaths}/${match.stats.assists}`
-                    : "Unknown"}
-                </p>
-                <p>
-                  <strong>RR Change:</strong>{" "}
-                  {match.mmr_change_to_last_game ?? "?"}
-                </p>
-                <p>
-                  <strong>RR After Game:</strong> {match.ranking_in_tier}/100
-                </p>
-                <p>
-                  <strong>Date:</strong> {match.date}
-                </p>
+          {matchHistory.map((match, i) => {
+            const rrChange = match.mmr_change_to_last_game ?? 0;
+            const isWin = rrChange >= 0;
+
+            return (
+              <div key={i} className={`match-card ${isWin ? "win" : "loss"}`}>
+                <img
+                  src={getMapImage(match.map?.id || "Unknown")}
+                  alt={match.map?.name}
+                  className="map-img"
+                />
+                <div className="match-info">
+                  <p>
+                    <strong>Map:</strong> {match.map?.name || "Unknown"}
+                  </p>
+                  <p>
+                    <strong>Rank:</strong>{" "}
+                    {match.currenttierpatched ?? "Unknown"}
+                  </p>
+                  <p>
+                    <strong>KDA:</strong>{" "}
+                    {match.stats
+                      ? `${match.stats.kills}/${match.stats.deaths}/${match.stats.assists}`
+                      : "Unknown"}
+                  </p>
+                  <p className={rrChange >= 0 ? "rr-up" : "rr-down"}>
+                    <strong>RR Change:</strong> {rrChange}
+                  </p>
+                  <p>
+                    <strong>RR After Game:</strong> {match.ranking_in_tier}/100
+                  </p>
+                  <p>
+                    <strong>Date:</strong> {match.date}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

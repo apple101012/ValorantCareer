@@ -91,3 +91,48 @@ body {
 .match-info {
   text-align: left;
 }
+.match-card {
+  background-color: #1e2a35;
+  margin: 15px auto;
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  transition: 0.3s ease-in-out;
+  width: 90%;
+  max-width: 800px;
+}
+
+/* Optional enhancements for larger screens */
+@media (min-width: 768px) {
+  .match-card {
+    width: 70%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .match-card {
+    width: 60%;
+  }
+}
+
+.match-card.win {
+  border: 1px solid #2eea8c;
+  background-color: rgba(46, 234, 140, 0.07);
+}
+
+.match-card.loss {
+  border: 1px solid #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.07);
+}
+
+.rr-up {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.rr-down {
+  color: #f44336;
+  font-weight: bold;
+}
