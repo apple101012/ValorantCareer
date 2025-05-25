@@ -1,107 +1,93 @@
-/* Global Styles */
 body {
-  margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #0f1923;
-  color: #ffffff;
+  color: white;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-.container {
-  max-width: 800px;
-  margin: auto;
+.App {
+  text-align: center;
   padding: 20px;
 }
 
-h1,
-h2,
-h3 {
-  color: #ff4655;
+.input-form {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-input,
-select {
-  padding: 10px;
-  margin: 5px;
+.input-form input,
+.input-form select,
+.input-form button {
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 6px;
   border: none;
-  border-radius: 5px;
 }
 
-button {
+.input-form button {
   background-color: #ff4655;
   color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
-button:hover {
-  background-color: #e03b4f;
+.input-form button:hover {
+  background-color: #e33b4c;
 }
 
-.rank-display {
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+.profile {
   margin-top: 20px;
-  padding: 15px;
-  background-color: #1f2a36;
-  border-radius: 10px;
-  text-align: center;
+}
+
+.rank-icon {
+  width: 100px;
+  height: 100px;
+}
+
+.progress-bar-container {
+  width: 100px;
+  background-color: #333;
+  border-radius: 6px;
+  margin: 0 auto;
+  height: 10px;
+  margin-bottom: 10px;
 }
 
 .progress-bar {
-  background-color: #2e3a48;
-  border-radius: 5px;
-  overflow: hidden;
-  margin-top: 10px;
+  background-color: #ff4655;
+  height: 10px;
+  border-radius: 6px;
 }
 
-.progress-bar-fill {
-  height: 20px;
-  background-color: #ff4655;
-  text-align: center;
-  line-height: 20px;
-  color: white;
-  transition: width 0.5s;
+.matches {
+  margin-top: 30px;
 }
 
 .match-card {
-  background-color: #1a232f;
-  margin: 15px 0;
+  background-color: #1e2a35;
+  margin: 10px auto;
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px;
   display: flex;
-  justify-content: space-between;
+  gap: 15px;
   align-items: center;
-  flex-wrap: wrap;
-}
-
-.match-info {
-  flex: 1;
-  min-width: 200px;
 }
 
 .map-img {
-  width: 150px;
-  border-radius: 5px;
-  margin-left: 20px;
-}
-.match-map {
   width: 120px;
   height: auto;
-  border-radius: 8px;
-  object-fit: cover;
-  box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
-  margin-top: 10px;
+  border-radius: 10px;
 }
 
-@media (max-width: 600px) {
-  .match-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .map-image {
-    margin-left: 0;
-    margin-top: 10px;
-  }
+.match-info {
+  text-align: left;
 }

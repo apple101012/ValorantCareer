@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
@@ -6,48 +6,60 @@ function App() {
   const [name, setName] = useState("");
   const [tag, setTag] = useState("");
   const [mmrData, setMmrData] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [matchHistory, setMatchHistory] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+
+  // Rank icon base URL
+  const getRankIcon = (tier) => {
+    return `https://media.valorant-api.com/competitivetiers/564d8e28-c226-3180-6285-e48a390db8b1/${tier}/largeicon.png`;
+  };
+
+  // Fallback map image if needed
+  const getMapImage = (mapName) => {
+    const formatted = mapName.toLowerCase().replace(/\s+/g, "");
+    return `https://media.valorant-api.com/maps/${formatted}/listview.png`;
+  };
 
   const fetchData = async () => {
-    setLoading(true);
+    setError(null);
     try {
+      console.log("Fetching MMR...");
       const mmrRes = await fetch(
-        `http://localhost:5000/api/mmr?region=${region}&name=${name}&tag=${tag}`
+        `http://localhost:5000/api/mmr?region=${region}&name=${encodeURIComponent(
+          name
+        )}&tag=${tag}`
       );
       const mmrJson = await mmrRes.json();
+      console.log("MMR JSON:", mmrJson);
+      if (!mmrJson.data || !mmrJson.data.current_data)
+        throw new Error("Invalid MMR data");
+      setMmrData(mmrJson.data);
 
-      if (!mmrJson.data || !mmrJson.data.current_data) {
-        throw new Error("Invalid or missing MMR data");
-      }
-
+      console.log("Fetching match history...");
       const historyRes = await fetch(
-        `http://localhost:5000/api/mmr-history?region=${region}&name=${name}&tag=${tag}`
+        `http://localhost:5000/api/mmr-history?region=${region}&name=${encodeURIComponent(
+          name
+        )}&tag=${tag}`
       );
       const historyJson = await historyRes.json();
-
-      if (!Array.isArray(historyJson.data)) {
-        throw new Error("Invalid match history data");
-      }
-
-      setMmrData(mmrJson.data);
-      setHistory(historyJson.data);
-      setError(null);
+      console.log("Match History JSON:", historyJson);
+      if (!historyJson.data) throw new Error("No match history found");
+      setMatchHistory(historyJson.data.slice(0, 10));
     } catch (err) {
-      console.error("Fetch error:", err);
-      setError("Failed to fetch player data. Check name, tag, and region.");
-      setMmrData(null);
-      setHistory([]);
+      console.error("Error fetching data:", err);
+      setError("Failed to fetch data. Please check your input.");
     }
-    setLoading(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetchData();
   };
 
   return (
     <div className="App">
       <h1>Valorant Career Tracker</h1>
-
-      <div className="form">
+      <form onSubmit={handleSubmit} className="input-form">
         <input
           type="text"
           placeholder="Username"
@@ -56,7 +68,7 @@ function App() {
         />
         <input
           type="text"
-          placeholder="Tagline"
+          placeholder="Tag"
           value={tag}
           onChange={(e) => setTag(e.target.value)}
         />
@@ -66,58 +78,75 @@ function App() {
           <option value="ap">AP</option>
           <option value="kr">KR</option>
         </select>
-        <button onClick={fetchData}>Search</button>
-      </div>
+        <button type="submit">Submit</button>
+      </form>
 
-      {loading && <p>Loading...</p>}
       {error && <p className="error">{error}</p>}
 
       {mmrData && (
         <div className="profile">
+          <img
+            src={getRankIcon(mmrData.current_data.currenttier)}
+            alt="Rank Icon"
+            className="rank-icon"
+          />
           <h2>
-            {mmrData.name}#{mmrData.tag} -{" "}
-            {mmrData.current_data.currenttier_patched}
+            {mmrData.current_data.currenttier_patched ??
+              `Tier ${mmrData.current_data.currenttier}`}
           </h2>
-          <div className="progress-container">
+          <div className="progress-bar-container">
             <div
               className="progress-bar"
-              style={{ width: `${mmrData.current_data.ranking_in_tier}%` }}
+              style={{
+                width: `${mmrData.current_data.ranking_in_tier}%`,
+              }}
             ></div>
-            <span>{mmrData.current_data.ranking_in_tier}/100 RR</span>
           </div>
+          <p>{mmrData.current_data.ranking_in_tier}/100 RR</p>
         </div>
       )}
 
-      {history.length > 0 && (
-        <div className="history">
-          <h3>Last 10 Matches</h3>
-          <div className="match-cards">
-            {history.slice(0, 10).map((match, index) => (
-              <div className="match-card" key={index}>
-                <img
-                  className="map-img"
-                  src={`https://media.valorant-api.com/maps/${match.map.id}/splash.png`}
-                  alt={match.map.name}
-                />
+      {matchHistory.length > 0 && (
+        <div className="matches">
+          <h2>Last 10 Matches</h2>
+          {matchHistory.map((match, i) => (
+            <div key={i} className="match-card">
+              <img
+                src={
+                  match.map?.id
+                    ? `https://media.valorant-api.com/maps/${match.map.id}/listview.png`
+                    : getMapImage(match.map?.name || "Unknown")
+                }
+                alt={match.map?.name}
+                className="map-img"
+              />
+              <div className="match-info">
                 <p>
-                  <strong>Map:</strong> {match.map.name}
+                  <strong>Map:</strong> {match.map?.name || "Unknown"}
                 </p>
                 <p>
-                  <strong>Rank:</strong> {match.currenttier_patched}
+                  <strong>Rank:</strong>{" "}
+                  {match.currenttier_patched ?? "Unknown"}
                 </p>
                 <p>
-                  <strong>RR Change:</strong> {match.mmr_change_to_last_game} RR
+                  <strong>KDA:</strong>{" "}
+                  {match.stats
+                    ? `${match.stats.kills}/${match.stats.deaths}/${match.stats.assists}`
+                    : "Unknown"}
                 </p>
                 <p>
-                  <strong>ELO:</strong> {match.elo}
+                  <strong>RR Change:</strong>{" "}
+                  {match.mmr_change_to_last_game ?? "?"}
                 </p>
                 <p>
-                  <strong>Date:</strong>{" "}
-                  {new Date(match.date_raw * 1000).toLocaleString()}
+                  <strong>Score:</strong> {match.ranking_in_tier}/100
+                </p>
+                <p>
+                  <strong>Date:</strong> {match.date}
                 </p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
