@@ -17,7 +17,7 @@ function App() {
   // Fallback map image if needed
   const getMapImage = (mapName) => {
     const formatted = mapName.toLowerCase().replace(/\s+/g, "");
-    return `https://media.valorant-api.com/maps/${formatted}/listview.png`;
+    return `https://media.valorant-api.com/maps/${formatted}/splash.png`;
   };
 
   const fetchData = async () => {
@@ -91,7 +91,7 @@ function App() {
             className="rank-icon"
           />
           <h2>
-            {mmrData.current_data.currenttier_patched ??
+            {mmrData.current_data.currenttierpatched ??
               `Tier ${mmrData.current_data.currenttier}`}
           </h2>
           <div className="progress-bar-container">
@@ -112,11 +112,7 @@ function App() {
           {matchHistory.map((match, i) => (
             <div key={i} className="match-card">
               <img
-                src={
-                  match.map?.id
-                    ? `https://media.valorant-api.com/maps/${match.map.id}/listview.png`
-                    : getMapImage(match.map?.name || "Unknown")
-                }
+                src={getMapImage(match.map?.id || "Unknown")}
                 alt={match.map?.name}
                 className="map-img"
               />
@@ -125,8 +121,7 @@ function App() {
                   <strong>Map:</strong> {match.map?.name || "Unknown"}
                 </p>
                 <p>
-                  <strong>Rank:</strong>{" "}
-                  {match.currenttier_patched ?? "Unknown"}
+                  <strong>Rank:</strong> {match.currenttierpatched ?? "Unknown"}
                 </p>
                 <p>
                   <strong>KDA:</strong>{" "}
