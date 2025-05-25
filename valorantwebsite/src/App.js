@@ -44,7 +44,53 @@ function App() {
       const historyJson = await historyRes.json();
       console.log("Match History JSON:", historyJson);
       if (!historyJson.data) throw new Error("No match history found");
-      setMatchHistory(historyJson.data.slice(0, 10));
+
+      const topMatches = historyJson.data.slice(0, 10);
+
+      const detailedMatches = await Promise.all(
+        topMatches.map(async (match) => {
+          try {
+            const matchDetailRes = await fetch(
+              `http://localhost:5000/api/match?region=${region}&matchid=${match.match_id}`
+            );
+            const matchDetailJson = await matchDetailRes.json();
+
+            console.log(
+              `Match Detail for ID ${match.match_id}:`,
+              matchDetailJson
+            );
+            const players = matchDetailJson?.data?.players;
+            if (!players) {
+              console.warn(
+                `No 'players' found in match ${match.match_id}`,
+                matchDetailJson?.data?.players
+              );
+              return match;
+            }
+
+            const playerStats = players.find(
+              (p) =>
+                p.name.toLowerCase() === name.toLowerCase() &&
+                p.tag.toLowerCase() === tag.toLowerCase()
+            );
+
+            console.log(
+              `Player stats for ${name}#${tag} in match ${match.match_id}:`,
+              playerStats
+            );
+
+            return {
+              ...match,
+              stats: playerStats?.stats ?? null,
+            };
+          } catch (err) {
+            console.warn(`Failed to fetch match ${match.match_id}`, err);
+            return match;
+          }
+        })
+      );
+
+      setMatchHistory(detailedMatches);
     } catch (err) {
       console.error("Error fetching data:", err);
       setError("Failed to fetch data. Please check your input.");
@@ -134,7 +180,7 @@ function App() {
                   {match.mmr_change_to_last_game ?? "?"}
                 </p>
                 <p>
-                  <strong>CurrentRR:</strong> {match.ranking_in_tier}/100
+                  <strong>RR After Game:</strong> {match.ranking_in_tier}/100
                 </p>
                 <p>
                   <strong>Date:</strong> {match.date}
