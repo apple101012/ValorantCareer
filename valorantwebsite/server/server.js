@@ -145,8 +145,6 @@ app.get("/api/match", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(
-    `\n✅ ValorantCareer API server running on http://localhost:${PORT}`
-  );
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ ValorantCareer API server running on port ${PORT}`);
 });
