@@ -1,46 +1,62 @@
 import React, { useState } from "react";
 import "./App.css";
 
-export default function App() {
-  const [region, setRegion] = useState("eu");
+function App() {
+  const [region, setRegion] = useState("na");
   const [name, setName] = useState("");
   const [tag, setTag] = useState("");
   const [mmrData, setMmrData] = useState(null);
-  const [matchHistory, setMatchHistory] = useState([]);
+  const [history, setHistory] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const API_BASE = "https://api.henrikdev.xyz/valorant";
-
-  async function fetchData() {
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      setError(null);
-      const mmrRes = await fetch(`${API_BASE}/v2/mmr/${region}/${name}/${tag}`);
+      const mmrRes = await fetch(
+        `http://localhost:5000/api/mmr?region=${region}&name=${name}&tag=${tag}`
+      );
       const mmrJson = await mmrRes.json();
-      if (!mmrJson.data) throw new Error("MMR data not found");
-      setMmrData(mmrJson.data);
+
+      if (!mmrJson.data || !mmrJson.data.current_data) {
+        throw new Error("Invalid or missing MMR data");
+      }
 
       const historyRes = await fetch(
-        `${API_BASE}/v1/mmr-history/${region}/${name}/${tag}`
+        `http://localhost:5000/api/mmr-history?region=${region}&name=${name}&tag=${tag}`
       );
       const historyJson = await historyRes.json();
-      setMatchHistory(historyJson.data || []);
+
+      if (!Array.isArray(historyJson.data)) {
+        throw new Error("Invalid match history data");
+      }
+
+      setMmrData(mmrJson.data);
+      setHistory(historyJson.data);
+      setError(null);
     } catch (err) {
-      setError("Failed to fetch data. Check username, tag, and region.");
-      console.error(err);
+      console.error("Fetch error:", err);
+      setError("Failed to fetch player data. Check name, tag, and region.");
+      setMmrData(null);
+      setHistory([]);
     }
-  }
+    setLoading(false);
+  };
 
   return (
-    <div className="app">
+    <div className="App">
       <h1>Valorant Career Tracker</h1>
-      <div className="input-group">
+
+      <div className="form">
         <input
+          type="text"
           placeholder="Username"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <input
-          placeholder="Tag (e.g. EUW3)"
+          type="text"
+          placeholder="Tagline"
           value={tag}
           onChange={(e) => setTag(e.target.value)}
         />
@@ -53,41 +69,59 @@ export default function App() {
         <button onClick={fetchData}>Search</button>
       </div>
 
+      {loading && <p>Loading...</p>}
       {error && <p className="error">{error}</p>}
 
       {mmrData && (
-        <div className="rank-section">
-          <h2>Rank: {mmrData.current_data.currenttier_patched}</h2>
+        <div className="profile">
+          <h2>
+            {mmrData.name}#{mmrData.tag} -{" "}
+            {mmrData.current_data.currenttier_patched}
+          </h2>
           <div className="progress-container">
             <div
               className="progress-bar"
               style={{ width: `${mmrData.current_data.ranking_in_tier}%` }}
-            >
-              {mmrData.current_data.ranking_in_tier}/100 RR
-            </div>
+            ></div>
+            <span>{mmrData.current_data.ranking_in_tier}/100 RR</span>
           </div>
         </div>
       )}
 
-      {matchHistory.length > 0 && (
+      {history.length > 0 && (
         <div className="history">
-          <h2>Last 10 Competitive Games</h2>
-          {matchHistory.slice(0, 10).map((match, idx) => (
-            <div className="match-card" key={idx}>
-              <h3>{match.map.name}</h3>
-              <p>Rank: {match.currenttier_patched}</p>
-              <p>RR Change: {match.mmr_change_to_last_game}</p>
-              <p>ELO: {match.elo}</p>
-              <p>Date: {match.date}</p>
-              {/* Replace this with real map image URLs if available */}
-              <img
-                src={`/maps/${match.map.name.toLowerCase()}.jpg`}
-                alt={match.map.name}
-              />
-            </div>
-          ))}
+          <h3>Last 10 Matches</h3>
+          <div className="match-cards">
+            {history.slice(0, 10).map((match, index) => (
+              <div className="match-card" key={index}>
+                <img
+                  className="map-img"
+                  src={`https://media.valorant-api.com/maps/${match.map.id}/splash.png`}
+                  alt={match.map.name}
+                />
+                <p>
+                  <strong>Map:</strong> {match.map.name}
+                </p>
+                <p>
+                  <strong>Rank:</strong> {match.currenttier_patched}
+                </p>
+                <p>
+                  <strong>RR Change:</strong> {match.mmr_change_to_last_game} RR
+                </p>
+                <p>
+                  <strong>ELO:</strong> {match.elo}
+                </p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {new Date(match.date_raw * 1000).toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 }
+
+export default App;
