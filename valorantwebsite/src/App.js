@@ -11,7 +11,7 @@ function App() {
 
   // Rank icon base URL
   const getRankIcon = (tier) => {
-    return `https://media.valorant-api.com/competitivetiers/564d8e28-c226-3180-6285-e48a390db8b1/${tier}/largeicon.png`;
+    return `https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/${tier}/largeicon.png`;
   };
 
   // Fallback map image if needed
@@ -134,7 +134,7 @@ function App() {
                   {match.mmr_change_to_last_game ?? "?"}
                 </p>
                 <p>
-                  <strong>Score:</strong> {match.ranking_in_tier}/100
+                  <strong>CurrentRR:</strong> {match.ranking_in_tier}/100
                 </p>
                 <p>
                   <strong>Date:</strong> {match.date}
