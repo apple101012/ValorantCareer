@@ -187,7 +187,21 @@ function App() {
                     <strong>RR After Game:</strong> {match.ranking_in_tier}/100
                   </p>
                   <p>
-                    <strong>Date:</strong> {match.date}
+                    <strong>Date:</strong>{" "}
+                    {match.date_raw
+                      ? new Date(match.date_raw * 1000).toLocaleString(
+                          "en-US",
+                          {
+                            timeZone: "America/New_York",
+                            year: "numeric",
+                            month: "numeric",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          }
+                        )
+                      : "Unknown"}
                   </p>
                 </div>
               </div>
