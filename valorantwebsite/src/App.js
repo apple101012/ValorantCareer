@@ -8,6 +8,7 @@ function App() {
   const [mmrData, setMmrData] = useState(null);
   const [matchHistory, setMatchHistory] = useState([]);
   const [error, setError] = useState(null);
+  const backend = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
   // Rank icon base URL
   const getRankIcon = (tier) => {
@@ -25,10 +26,11 @@ function App() {
     try {
       console.log("Fetching MMR...");
       const mmrRes = await fetch(
-        `http://localhost:5000/api/mmr?region=${region}&name=${encodeURIComponent(
+        `${backend}/api/mmr?region=${region}&name=${encodeURIComponent(
           name
         )}&tag=${tag}`
       );
+
       const mmrJson = await mmrRes.json();
       console.log("MMR JSON:", mmrJson);
       if (!mmrJson.data || !mmrJson.data.current_data)
@@ -37,10 +39,11 @@ function App() {
 
       console.log("Fetching match history...");
       const historyRes = await fetch(
-        `http://localhost:5000/api/mmr-history?region=${region}&name=${encodeURIComponent(
+        `${backend}/api/mmr-history?region=${region}&name=${encodeURIComponent(
           name
         )}&tag=${tag}`
       );
+
       const historyJson = await historyRes.json();
       console.log("Match History JSON:", historyJson);
       if (!historyJson.data) throw new Error("No match history found");
@@ -51,7 +54,7 @@ function App() {
         topMatches.map(async (match) => {
           try {
             const matchDetailRes = await fetch(
-              `http://localhost:5000/api/match?region=${region}&matchid=${match.match_id}`
+              `${backend}/api/match?region=${region}&matchid=${match.match_id}`
             );
             const matchDetailJson = await matchDetailRes.json();
 
