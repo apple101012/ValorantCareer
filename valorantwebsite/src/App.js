@@ -8,14 +8,13 @@ function App() {
   const [mmrData, setMmrData] = useState(null);
   const [matchHistory, setMatchHistory] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const backend = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
-  // Rank icon base URL
   const getRankIcon = (tier) => {
     return `https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/${tier}/largeicon.png`;
   };
 
-  // Fallback map image if needed
   const getMapImage = (mapName) => {
     const formatted = mapName.toLowerCase().replace(/\s+/g, "");
     return `https://media.valorant-api.com/maps/${formatted}/splash.png`;
@@ -23,30 +22,34 @@ function App() {
 
   const fetchData = async () => {
     setError(null);
+    setLoading(true);
     try {
-      console.log("Fetching MMR...");
       const mmrRes = await fetch(
         `${backend}/api/mmr?region=${region}&name=${encodeURIComponent(
           name
         )}&tag=${tag}`
       );
-
+      if (mmrRes.status === 429) {
+        throw new Error("API rate limit exceeded. Try again in 1 minute.");
+      }
       const mmrJson = await mmrRes.json();
-      console.log("MMR JSON:", mmrJson);
-      if (!mmrJson.data || !mmrJson.data.current_data)
+      if (!mmrJson.data || !mmrJson.data.current_data) {
         throw new Error("Invalid MMR data");
+      }
       setMmrData(mmrJson.data);
 
-      console.log("Fetching match history...");
       const historyRes = await fetch(
         `${backend}/api/mmr-history?region=${region}&name=${encodeURIComponent(
           name
         )}&tag=${tag}`
       );
-
+      if (historyRes.status === 429) {
+        throw new Error("API rate limit exceeded. Try again in 1 minute.");
+      }
       const historyJson = await historyRes.json();
-      console.log("Match History JSON:", historyJson);
-      if (!historyJson.data) throw new Error("No match history found");
+      if (!historyJson.data) {
+        throw new Error("No match history found");
+      }
 
       const topMatches = historyJson.data.slice(0, 10);
 
@@ -56,20 +59,14 @@ function App() {
             const matchDetailRes = await fetch(
               `${backend}/api/match?region=${region}&matchid=${match.match_id}`
             );
-            const matchDetailJson = await matchDetailRes.json();
-
-            console.log(
-              `Match Detail for ID ${match.match_id}:`,
-              matchDetailJson
-            );
-            const players = matchDetailJson?.data?.players;
-            if (!players) {
-              console.warn(
-                `No 'players' found in match ${match.match_id}`,
-                matchDetailJson?.data?.players
+            if (matchDetailRes.status === 429) {
+              throw new Error(
+                "API rate limit exceeded. Try again in 1 minute."
               );
-              return match;
             }
+            const matchDetailJson = await matchDetailRes.json();
+            const players = matchDetailJson?.data?.players;
+            if (!players) return match;
 
             const playerStats = players.find(
               (p) =>
@@ -77,17 +74,11 @@ function App() {
                 p.tag.toLowerCase() === tag.toLowerCase()
             );
 
-            console.log(
-              `Player stats for ${name}#${tag} in match ${match.match_id}:`,
-              playerStats
-            );
-
             return {
               ...match,
               stats: playerStats?.stats ?? null,
             };
           } catch (err) {
-            console.warn(`Failed to fetch match ${match.match_id}`, err);
             return match;
           }
         })
@@ -96,7 +87,9 @@ function App() {
       setMatchHistory(detailedMatches);
     } catch (err) {
       console.error("Error fetching data:", err);
-      setError("Failed to fetch data. Please check your input.");
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,6 +123,15 @@ function App() {
         <button type="submit">Submit</button>
       </form>
 
+      {loading && (
+        <div className="loading">
+          <p>Fetching data...</p>
+          <div className="loading-bar-container">
+            <div className="loading-bar"></div>
+          </div>
+        </div>
+      )}
+
       {error && <p className="error">{error}</p>}
 
       {mmrData && (
@@ -160,7 +162,6 @@ function App() {
           <h2>Last 10 Matches</h2>
           {matchHistory.map((match, i) => {
             const rrChange = match.mmr_change_to_last_game ?? 0;
-            const isWin = rrChange >= 0;
 
             return (
               <div

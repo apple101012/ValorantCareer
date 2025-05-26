@@ -163,3 +163,36 @@ body {
   color: #e0c16d;
   font-weight: bold;
 }
+
+.loading {
+  margin-top: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.loading-bar-container {
+  width: 80%;
+  max-width: 400px;
+  height: 8px;
+  background-color: #333;
+  border-radius: 5px;
+  margin: 10px auto;
+  overflow: hidden;
+}
+
+.loading-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #ff4655, #e33b4c);
+  animation: loadingAnimation 1.5s infinite linear;
+  border-radius: 5px;
+}
+
+@keyframes loadingAnimation {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
