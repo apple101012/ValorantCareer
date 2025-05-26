@@ -163,7 +163,12 @@ function App() {
             const isWin = rrChange >= 0;
 
             return (
-              <div key={i} className={`match-card ${isWin ? "win" : "loss"}`}>
+              <div
+                key={i}
+                className={`match-card ${
+                  rrChange > 0 ? "win" : rrChange < 0 ? "loss" : "draw"
+                }`}
+              >
                 <img
                   src={getMapImage(match.map?.id || "Unknown")}
                   alt={match.map?.name}
@@ -183,7 +188,15 @@ function App() {
                       ? `${match.stats.kills}/${match.stats.deaths}/${match.stats.assists}`
                       : "Unknown"}
                   </p>
-                  <p className={rrChange >= 0 ? "rr-up" : "rr-down"}>
+                  <p
+                    className={
+                      rrChange > 0
+                        ? "rr-up"
+                        : rrChange < 0
+                        ? "rr-down"
+                        : "rr-draw"
+                    }
+                  >
                     <strong>RR Change:</strong> {rrChange}
                   </p>
                   <p>

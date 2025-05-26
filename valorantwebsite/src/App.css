@@ -13,6 +13,7 @@ body {
 
 .input-form {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
   margin-bottom: 20px;
@@ -21,10 +22,11 @@ body {
 .input-form input,
 .input-form select,
 .input-form button {
-  padding: 8px;
+  padding: 10px;
   font-size: 16px;
   border-radius: 6px;
   border: none;
+  min-width: 200px;
 }
 
 .input-form button {
@@ -72,14 +74,15 @@ body {
 
 .match-card {
   background-color: #1e2a35;
-  margin: 10px auto;
+  margin: 15px auto;
   padding: 15px;
   border-radius: 10px;
-  width: 90%;
-  max-width: 600px;
   display: flex;
   gap: 15px;
   align-items: center;
+  transition: 0.3s ease-in-out;
+  width: 90%;
+  max-width: 800px;
 }
 
 .map-img {
@@ -90,18 +93,6 @@ body {
 
 .match-info {
   text-align: left;
-}
-.match-card {
-  background-color: #1e2a35;
-  margin: 15px auto;
-  padding: 15px;
-  border-radius: 10px;
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  transition: 0.3s ease-in-out;
-  width: 90%;
-  max-width: 800px;
 }
 
 /* Optional enhancements for larger screens */
@@ -117,6 +108,35 @@ body {
   }
 }
 
+/* 💡 Mobile-specific layout improvements */
+@media (max-width: 600px) {
+  .input-form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .input-form input,
+  .input-form select,
+  .input-form button {
+    width: 90%;
+    max-width: 300px;
+  }
+
+  .match-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .match-info {
+    text-align: center;
+  }
+
+  .map-img {
+    width: 80%;
+    height: auto;
+  }
+}
+
 .match-card.win {
   border: 1px solid #2eea8c;
   background-color: rgba(46, 234, 140, 0.07);
@@ -126,7 +146,10 @@ body {
   border: 1px solid #ff6b6b;
   background-color: rgba(255, 107, 107, 0.07);
 }
-
+.match-card.draw {
+  border: 1px solid #e0c16d;
+  background-color: rgba(224, 193, 109, 0.08); /* soft sandy yellow */
+}
 .rr-up {
   color: #4caf50;
   font-weight: bold;
@@ -134,5 +157,9 @@ body {
 
 .rr-down {
   color: #f44336;
+  font-weight: bold;
+}
+.rr-draw {
+  color: #e0c16d;
   font-weight: bold;
 }
